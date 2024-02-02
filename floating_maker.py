@@ -56,7 +56,7 @@ async def main(
     base_asset_amount,
     subaccount_id,
     spread=0.01,
-    offset=0,
+    skew=0,
     min_position=None,
     max_position=None,
     authority=None,
@@ -118,14 +118,11 @@ async def main(
     perp_position = drift_user.get_perp_position(market_index)
 
     print(perp_position)
-    base_asset_amount_pos = perp_position.base_asset_amount if perp_position is not None else 0
-
-    is_long = base_asset_amount_pos > 0
-    is_short = base_asset_amount_pos < 0
+    base_asset_pos = perp_position.base_asset_amount/BASE_PRECISION if perp_position is not None else 0
     
-    delta_pos = base_asset_amount_pos/BASE_PRECISION - target_pos
+    delta_pos = base_asset_pos - target_pos
     
-    offset = -1 * 0.01 * delta_pos / base_asset_amount
+    offset = -1 * skew * delta_pos / base_asset_amount
     print("delta_pos:", delta_pos, "offset:  %.6f" % offset)
     # offset =0 
     
@@ -217,7 +214,7 @@ if __name__ == "__main__":
     parser.add_argument("--authority", type=str, required=False, default=None)
 
     parser.add_argument("--spread", type=float, required=False, default=0.2)  # $0.01
-    parser.add_argument("--offset", type=float, required=False, default=0)  # $0.00
+    parser.add_argument("--skew", type=float, required=False, default=0.01)  # $0.00
     parser.add_argument("--min-position", type=float, required=False, default=None)
     parser.add_argument("--max-position", type=float, required=False, default=None)
     parser.add_argument("--maker", type=bool, required=False, default=True)
@@ -258,7 +255,7 @@ if __name__ == "__main__":
                     args.amount,
                     args.subaccount,
                     args.spread,
-                    args.offset,
+                    args.skew,
                     args.min_position,
                     args.max_position,
                     args.authority,

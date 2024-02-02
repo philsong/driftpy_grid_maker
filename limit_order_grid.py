@@ -78,9 +78,9 @@ def calculate_grid_prices(
 
     for i in range(num_of_grids):
         price = lower_price + (grid_size * i)
-        print("calculate_grid_prices without offset: %d %.4f" % (i, price))
+        # print("calculate_grid_prices without offset: %d %.4f" % (i, price))
         price_with_offset = price + offset
-        print("calculate_grid_prices with    offset: %d %.4f" % (i, price_with_offset))
+        # print("calculate_grid_prices with    offset: %d %.4f" % (i, price_with_offset))
         if price < current_price and price > lower_price:
             if price_with_offset > current_price: #avoid maker reject
                 price_with_offset = current_price
@@ -109,7 +109,7 @@ async def main(
     quote_asset_amount,
     grids,
     spread=0.01,
-    offset=0,
+    skew=0,
     upper_price=None,
     lower_price=None,
     min_position=None,
@@ -244,9 +244,8 @@ async def main(
     
     delta_pos = base_asset_pos - target_pos
     
-    offset = -1 * 0.01 * delta_pos / base_asset_amount
+    offset = -1 * skew * delta_pos / base_asset_amount
     print("target_pos:", target_pos, "base_asset_pos: %.1f" % base_asset_pos, "delta_pos: %.1f" % delta_pos, "offset:  %.6f" % offset)
-    # offset =0 
     
     unrealized_pnl = drift_user.get_unrealized_pnl()/QUOTE_PRECISION
     print("unrealized_pnl: %.1f" % unrealized_pnl)
@@ -345,7 +344,7 @@ if __name__ == "__main__":
     parser.add_argument("--authority", type=str, required=False, default=None)
     
     parser.add_argument("--spread", type=float, required=False, default=0.005)  # $0.01
-    parser.add_argument("--offset", type=float, required=False, default=0)  # $0.00
+    parser.add_argument("--skew", type=float, required=False, default=0.01)  # $0.00
     parser.add_argument("--min-position", type=float, required=False, default=None)
     parser.add_argument("--max-position", type=float, required=False, default=None)
     parser.add_argument("--lower-price", type=float, required=False, default=None)
@@ -389,7 +388,7 @@ if __name__ == "__main__":
                     args.amount,
                     args.grids,
                     args.spread,
-                    args.offset,
+                    args.skew,
                     args.upper_price,
                     args.lower_price,
                     args.min_position,
