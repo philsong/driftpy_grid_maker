@@ -189,12 +189,12 @@ async def main(
             drift_acct.get_place_spot_order_ix(ask_order_params, subaccount_id),
         ]
 
-    # print("get_cancel_orders_ix:", drift_acct.get_cancel_orders_ix(sub_account_id=subaccount_id))
+    cancel_ix = drift_acct.get_cancel_orders_ix(sub_account_id=subaccount_id)
+    # print("cancel_ix:", cancel_ix)
     # print("perp_orders_ix:", perp_orders_ix)
-    # print("spot_orders_ix:", spot_orders_ix)
     signature = (await drift_acct.send_ixs(
         [
-            drift_acct.get_cancel_orders_ix(sub_account_id=subaccount_id),
+            cancel_ix,
         ]
         + perp_orders_ix
         + spot_orders_ix
