@@ -95,7 +95,12 @@ async def main(
     provider = Provider(connection, wallet)
     
     perp_markets = [0]
+    if market_index not in perp_markets:
+        perp_markets.append(market_index)
     spot_markets = [0, 1]
+    if market_index not in spot_markets:
+        spot_markets.append(market_index)
+        
     spot_market_oracle_infos, perp_market_oracle_infos, spot_market_indexes = get_markets_and_oracles(perp_markets = perp_markets, spot_markets=spot_markets)
 
     oracle_infos = spot_market_oracle_infos + perp_market_oracle_infos
@@ -114,7 +119,6 @@ async def main(
     
     drift_user = drift_acct.get_user()
     print('drift_user:', drift_user)
-    market_index = 0
     perp_position = drift_user.get_perp_position(market_index)
 
     print(perp_position)

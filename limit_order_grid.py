@@ -150,7 +150,11 @@ async def main(
     provider = Provider(connection, wallet)
     
     perp_markets = [0]
+    if market_index not in perp_markets:
+        perp_markets.append(market_index)
     spot_markets = [0, 1]
+    if market_index not in spot_markets:
+        spot_markets.append(market_index)
     spot_market_oracle_infos, perp_market_oracle_infos, spot_market_indexes = get_markets_and_oracles(perp_markets = perp_markets, spot_markets=spot_markets)
 
     oracle_infos = spot_market_oracle_infos + perp_market_oracle_infos
@@ -168,13 +172,7 @@ async def main(
 
     await drift_acct.subscribe()
     
-    drift_user = drift_acct.get_user()
-
-    market_index = 0
-        
-    # inspect user's leverage
-    leverage = drift_user.get_leverage()
-    print('current leverage:', leverage / 10_000)
+    drift_user = drift_acct.get_user()        
 
     if is_perp:
         market = await get_perp_market_account(drift_acct.program, market_index)
@@ -232,20 +230,18 @@ async def main(
         spread
     )
     
+    # inspect user's leverage
+    leverage = drift_user.get_leverage()
+    print('current leverage:', leverage / 10_000)
+    
     base_asset_amount = quote_asset_amount / current_price
 
     print("quote_asset_amount: %.1f" % quote_asset_amount, "base_asset_amount:%.1f" % base_asset_amount)
     
-    market_index = 0
-    perp_position = drift_user.get_perp_position(market_index)
-
-    print("perp_position:", perp_position)
-    base_asset_pos = perp_position.base_asset_amount/BASE_PRECISION if perp_position is not None else 0
-    
-    delta_pos = base_asset_pos - target_pos
+    delta_pos = current_pos - target_pos
     
     offset = -1 * skew * delta_pos / base_asset_amount
-    print("target_pos:", target_pos, "base_asset_pos: %.1f" % base_asset_pos, "delta_pos: %.1f" % delta_pos, "offset:  %.6f" % offset)
+    print("target_pos:", target_pos, "current_pos: %.1f" % current_pos, "delta_pos: %.1f" % delta_pos, "offset:  %.6f" % offset)
     
     unrealized_pnl = drift_user.get_unrealized_pnl()/QUOTE_PRECISION
     print("unrealized_pnl: %.1f" % unrealized_pnl)
@@ -299,7 +295,7 @@ async def main(
             price=int(x * PRICE_PRECISION),
             post_only=PostOnlyParams.TryPostOnly() if maker else PostOnlyParams.NONE(),
         )
-        if bid_order_params.base_asset_amount > 0:
+        if bid_order_params.base_asset_amount*bid_order_params.price > 11*BASE_PRECISION*PRICE_PRECISION:
             order_params.append(bid_order_params)
 
     for x in ask_prices:
@@ -312,7 +308,7 @@ async def main(
             price=int(x * PRICE_PRECISION),
             post_only=PostOnlyParams.TryPostOnly() if maker else PostOnlyParams.NONE(),
         )
-        if ask_order_params.base_asset_amount > 0:
+        if ask_order_params.base_asset_amount*ask_order_params.price > 11*BASE_PRECISION*PRICE_PRECISION:
             order_params.append(ask_order_params)
     # print(order_params)
     # order_print([bid_order_params, ask_order_params], market_name)
