@@ -115,7 +115,7 @@ async def main(
     min_position=None,
     max_position=None,
     authority=None,
-    taker=False,
+    maker=True,
     target_pos = 0,
 ):
     if min_position is not None and max_position is not None:
@@ -298,7 +298,7 @@ async def main(
             direction=PositionDirection.Long(),
             base_asset_amount=int(base_asset_amount_per_bid * BASE_PRECISION),
             price=int(x * PRICE_PRECISION),
-            post_only=PostOnlyParams.TryPostOnly() if taker else PostOnlyParams.NONE(),
+            post_only=PostOnlyParams.TryPostOnly() if maker else PostOnlyParams.NONE(),
         )
         if bid_order_params.base_asset_amount > 0:
             order_params.append(bid_order_params)
@@ -311,7 +311,7 @@ async def main(
             direction=PositionDirection.Short(),
             base_asset_amount=int(base_asset_amount_per_ask * BASE_PRECISION),
             price=int(x * PRICE_PRECISION),
-            post_only=PostOnlyParams.TryPostOnly() if taker else PostOnlyParams.NONE(),
+            post_only=PostOnlyParams.TryPostOnly() if maker else PostOnlyParams.NONE(),
         )
         if ask_order_params.base_asset_amount > 0:
             order_params.append(ask_order_params)
@@ -351,7 +351,7 @@ if __name__ == "__main__":
     parser.add_argument("--lower-price", type=float, required=False, default=None)
     parser.add_argument("--upper-price", type=float, required=False, default=None)
     parser.add_argument("--grids", type=int, required=True)
-    parser.add_argument("--taker", type=bool, required=False, default=False)
+    parser.add_argument("--maker", type=bool, required=False, default=True)
     parser.add_argument("--target-pos", type=float, required=False, default=0.)
 
     parser.add_argument("--loop", type=int, required=False, default=0)
@@ -359,7 +359,7 @@ if __name__ == "__main__":
     
     print(args)
 
-    # assert(args.spread > 0, 'spread must be > $0')
+    assert(args.spread > 0, 'spread must be > $0')
     # assert(args.spread+args.offset < 2000, 'Invalid offset + spread (> $2000)')
 
     if args.keypath is None:
@@ -377,52 +377,32 @@ if __name__ == "__main__":
         raise NotImplementedError("only devnet/mainnet env supported")
     import asyncio
 
-    if args.loop > 0:
-        while 1:
-            try:
-                asyncio.run(
-                    main(
-                        args.keypath,
-                        args.env,
-                        url,
-                        args.subaccount,
-                        args.market,
-                        args.amount,
-                        args.grids,
-                        args.spread,
-                        args.offset,
-                        args.upper_price,
-                        args.lower_price,
-                        args.min_position,
-                        args.max_position,
-                        args.authority,
-                        args.taker,
-                        args.target_pos
-                    )
+    while 1:
+        try:
+            asyncio.run(
+                main(
+                    args.keypath,
+                    args.env,
+                    url,
+                    args.subaccount,
+                    args.market,
+                    args.amount,
+                    args.grids,
+                    args.spread,
+                    args.offset,
+                    args.upper_price,
+                    args.lower_price,
+                    args.min_position,
+                    args.max_position,
+                    args.authority,
+                    args.maker,
+                    args.target_pos
                 )
-            except Exception as e:
-                print("Exception:")
-                print(e)
-                time.sleep(60)
-            time.sleep(args.loop)
-    else:
-        asyncio.run(
-            main(
-                args.keypath,
-                args.env,
-                url,
-                args.subaccount,
-                args.market,
-                args.amount,
-                args.grids,
-                args.spread,
-                args.offset,
-                args.upper_price,
-                args.lower_price,
-                args.min_position,
-                args.max_position,
-                args.authority,
-                args.taker,
-                args.target_pos
             )
-        )
+            if args.loop <= 0:
+                exit(0)
+        except Exception as e:
+            print("Exception:", e)
+            time.sleep(60)
+        time.sleep(args.loop)
+

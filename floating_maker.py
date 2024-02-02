@@ -60,6 +60,8 @@ async def main(
     min_position=None,
     max_position=None,
     authority=None,
+    maker=True,
+    target_pos=0.
 ):        
     if min_position is not None and max_position is not None:
         assert min_position < max_position
@@ -121,10 +123,10 @@ async def main(
     is_long = base_asset_amount_pos > 0
     is_short = base_asset_amount_pos < 0
     
-    pos = base_asset_amount_pos/BASE_PRECISION + 100
+    delta_pos = base_asset_amount_pos/BASE_PRECISION - target_pos
     
-    offset = -1 * 0.0001 * pos / base_asset_amount
-    print("pos:", pos, "offset:  %.6f" % offset)
+    offset = -1 * 0.01 * delta_pos / base_asset_amount
+    print("delta_pos:", delta_pos, "offset:  %.6f" % offset)
     # offset =0 
     
     unrealized_pnl = drift_user.get_unrealized_pnl()/QUOTE_PRECISION
@@ -140,7 +142,7 @@ async def main(
         price=0,
         market_index=market_index,
         reduce_only=False,
-        post_only=PostOnlyParams.TryPostOnly(),
+        post_only=PostOnlyParams.TryPostOnly() if maker else PostOnlyParams.NONE(),
         immediate_or_cancel=False,
         trigger_price=0,
         trigger_condition=OrderTriggerCondition.Above(),
@@ -218,12 +220,16 @@ if __name__ == "__main__":
     parser.add_argument("--offset", type=float, required=False, default=0)  # $0.00
     parser.add_argument("--min-position", type=float, required=False, default=None)
     parser.add_argument("--max-position", type=float, required=False, default=None)
+    parser.add_argument("--maker", type=bool, required=False, default=True)
+    parser.add_argument("--target-pos", type=float, required=False, default=0.)
     
     parser.add_argument("--loop", type=int, required=False, default=0)
 
     args = parser.parse_args()
+    
+    print(args)
 
-    # assert(args.spread > 0, 'spread must be > $0')
+    assert(args.spread > 0, 'spread must be > $0')
     # assert(args.spread+args.offset < 2000, 'Invalid offset + spread (> $2000)')
 
     if args.keypath is None:
@@ -241,42 +247,29 @@ if __name__ == "__main__":
         raise NotImplementedError("only devnet/mainnet env supported")
 
     import asyncio
-    if args.loop > 0:
-        while 1:
-            try:
-                asyncio.run(
-                    main(
-                        args.keypath,
-                        args.env,
-                        url,
-                        args.market,
-                        args.amount,
-                        args.subaccount,
-                        args.spread,
-                        args.offset,
-                        args.min_position,
-                        args.max_position,
-                        args.authority,
-                    )
+    while 1:
+        try:
+            asyncio.run(
+                main(
+                    args.keypath,
+                    args.env,
+                    url,
+                    args.market,
+                    args.amount,
+                    args.subaccount,
+                    args.spread,
+                    args.offset,
+                    args.min_position,
+                    args.max_position,
+                    args.authority,
+                    args.maker,
+                    args.target_pos
                 )
-            except Exception as e:
-                print("Exception:")
-                print(e)
-                time.sleep(60)
-            time.sleep(args.loop)
-    else:
-        asyncio.run(
-            main(
-                args.keypath,
-                args.env,
-                url,
-                args.market,
-                args.amount,
-                args.subaccount,
-                args.spread,
-                args.offset,
-                args.min_position,
-                args.max_position,
-                args.authority,
             )
-        )
+            if args.loop <= 0:
+                exit(0)
+        except Exception as e:
+            print("Exception:", e)
+            time.sleep(60)
+        time.sleep(args.loop)
+   
