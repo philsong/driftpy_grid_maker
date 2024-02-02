@@ -359,7 +359,7 @@ if __name__ == "__main__":
     
     print(args)
 
-    assert(args.spread > 0, 'spread must be > $0')
+    # assert(args.spread > 0, 'spread must be > $0')
     # assert(args.spread+args.offset < 2000, 'Invalid offset + spread (> $2000)')
 
     if args.keypath is None:

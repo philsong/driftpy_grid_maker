@@ -170,11 +170,11 @@ async def main(
     perp_orders_ix = []
     spot_orders_ix = []
     if is_perp:
-        if pos > 50:
+        if max_position is not None and delta_pos > max_position:
             perp_orders_ix = [
                 drift_acct.get_place_perp_order_ix(ask_order_params, subaccount_id),
             ]
-        elif pos < -50:
+        elif min_position is not None and delta_pos < min_position:
             perp_orders_ix = [
                 drift_acct.get_place_perp_order_ix(bid_order_params, subaccount_id),
             ]
@@ -229,7 +229,7 @@ if __name__ == "__main__":
     
     print(args)
 
-    assert(args.spread > 0, 'spread must be > $0')
+    # assert(args.spread < 0, 'spread must be > $0')
     # assert(args.spread+args.offset < 2000, 'Invalid offset + spread (> $2000)')
 
     if args.keypath is None:
