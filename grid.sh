@@ -1,2 +1,2 @@
 export ANCHOR_WALLET="/home/ec2-user/drift/my-keypair.json"
-python limit_order_grid.py --env mainnet --market SOL-PERP  --min-position -200 --max-position -50 --loop 10 --amount 500 --grids 5 --spread 0.005 --target-pos -175
+python limit_order_grid.py --env mainnet --market SOL-PERP  --min-position -250 --max-position -150 --loop 10 --amount 200 --grids 5 --spread 0.005 --target-pos -200

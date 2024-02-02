@@ -168,6 +168,7 @@ async def main(
         oracle_infos = oracle_infos,
         account_subscription = AccountSubscriptionConfig("demo"),
         authority=Pubkey.from_string(authority) if authority else None,
+        active_sub_account_id = subaccount_id
     )
 
     await drift_acct.subscribe()
@@ -185,18 +186,20 @@ async def main(
             current_price = (
                 market.amm.historical_oracle_data.last_oracle_price / PRICE_PRECISION
             )
-        # current_price = 20.00
+        
         current_pos_raw = drift_user.get_perp_position(market_index)
+        print("current_pos_raw:", current_pos_raw)
+
         if current_pos_raw is not None:
             current_pos = current_pos_raw.base_asset_amount / float(BASE_PRECISION)
         else:
             current_pos = 0
         
-        print("current_pos_raw:", current_pos_raw)
-        if current_pos_raw.open_orders >= 30:
-            print("open_orders full:", current_pos_raw.open_orders)
-            time.sleep(60)
-            return
+        if current_pos_raw is not None:
+            if current_pos_raw.open_orders >= 30:
+                print("open_orders full:", current_pos_raw.open_orders)
+                time.sleep(60)
+                return
 
     else:
         market = await get_spot_market_account(drift_acct.program, market_index)
@@ -314,11 +317,12 @@ async def main(
     # order_print([bid_order_params, ask_order_params], market_name)
     order_print(order_params, market_name)
     
-    print("open_orders:%d len(order_params): %d" % (current_pos_raw.open_orders, len(order_params)))
-    if current_pos_raw.open_orders + len(order_params) >= 30:
-        print("open_orders near full:", current_pos_raw.open_orders)
-        time.sleep(60)
-        return
+    if current_pos_raw is not None:
+        print("open_orders:%d len(order_params): %d" % (current_pos_raw.open_orders, len(order_params)))
+        if current_pos_raw.open_orders + len(order_params) >= 30:
+            print("open_orders near full:", current_pos_raw.open_orders)
+            time.sleep(60)
+            return
     
     place_orders_ix = drift_acct.get_place_orders_ix(order_params)
     # perp_orders_ix = [ await drift_acct.get_place_perp_order_ix(order_params[0], subaccount_id)]

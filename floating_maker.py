@@ -114,20 +114,21 @@ async def main(
         oracle_infos = oracle_infos,
         account_subscription = AccountSubscriptionConfig("demo"),
         authority=Pubkey.from_string(authority) if authority else None,
+        active_sub_account_id = subaccount_id
     )
     await drift_acct.subscribe()
     
     drift_user = drift_acct.get_user()
-    print('drift_user:', drift_user)
+    # print('drift_user:', drift_user)
     perp_position = drift_user.get_perp_position(market_index)
 
-    print(perp_position)
+    print("perp_position:", perp_position)
     base_asset_pos = perp_position.base_asset_amount/BASE_PRECISION if perp_position is not None else 0
     
     delta_pos = base_asset_pos - target_pos
     
     offset = -1 * skew * delta_pos / base_asset_amount
-    print("delta_pos:", delta_pos, "offset:  %.6f" % offset)
+    print("base_asset_pos:",base_asset_pos, "delta_pos:", delta_pos, "offset:  %.6f" % offset)
     # offset =0 
     
     unrealized_pnl = drift_user.get_unrealized_pnl()/QUOTE_PRECISION
