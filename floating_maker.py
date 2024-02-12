@@ -87,14 +87,14 @@ async def main(
         print("INVALID MARKET")
         return
 
-    # print("market_index:", market_index)
+    print("market_index:", market_index, market_name)
     
     # print("config.env:", config.env)
     wallet = Wallet(keypair)
     connection = AsyncClient(url)
     provider = Provider(connection, wallet)
     
-    perp_markets = [0]
+    perp_markets = [0, 1]
     if market_index not in perp_markets:
         perp_markets.append(market_index)
     spot_markets = [0, 1]
@@ -112,7 +112,7 @@ async def main(
         perp_market_indexes = perp_markets,
         spot_market_indexes = spot_market_indexes,
         oracle_infos = oracle_infos,
-        account_subscription = AccountSubscriptionConfig("demo"),
+        account_subscription = AccountSubscriptionConfig("cached"),
         authority=Pubkey.from_string(authority) if authority else None,
         active_sub_account_id = subaccount_id
     )
@@ -243,8 +243,8 @@ if __name__ == "__main__":
     if args.env == "devnet":
         url = "https://api.devnet.solana.com"
     elif args.env == "mainnet":
-        url = "https://api.mainnet-beta.solana.com"
-        # url = "https://node.onekey.so/sol"
+        # url = "https://api.mainnet-beta.solana.com"
+        url = "https://node.onekey.so/sol"
     else:
         raise NotImplementedError("only devnet/mainnet env supported")
 
@@ -272,6 +272,8 @@ if __name__ == "__main__":
                 exit(0)
         except Exception as e:
             print("Exception:", e)
+            import sys, traceback
+            traceback.print_exc()
             time.sleep(60)
         time.sleep(args.loop)
    
