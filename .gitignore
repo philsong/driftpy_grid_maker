@@ -163,3 +163,5 @@ cython_debug/
 .idea/
 
 scratch
+
+float-delegate-test.sh

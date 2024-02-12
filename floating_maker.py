@@ -47,6 +47,9 @@ def order_print(orders: list[OrderParams], market_str=None):
             pricestr,
         )
 
+def init():
+    pass
+    
 
 async def main(
     keypath,
@@ -103,6 +106,7 @@ async def main(
         
     spot_market_oracle_infos, perp_market_oracle_infos, spot_market_indexes = get_markets_and_oracles(perp_markets = perp_markets, spot_markets=spot_markets)
 
+    print(spot_market_indexes)
     oracle_infos = spot_market_oracle_infos + perp_market_oracle_infos
     # print("oracle_infos:", oracle_infos)
     drift_acct = DriftClient(
@@ -166,9 +170,10 @@ async def main(
     ask_order_params.direction = PositionDirection.Short()
     ask_order_params.oracle_price_offset = int((offset + spread / 2) * PRICE_PRECISION)
 
-    # print("ask_order_params:", ask_order_params)
+    print("ask_order_params:", ask_order_params)
     order_print([bid_order_params, ask_order_params], market_name)
     
+    print("subaccount_id:", subaccount_id)
     perp_orders_ix = []
     spot_orders_ix = []
     if is_perp:
@@ -273,7 +278,10 @@ if __name__ == "__main__":
         except Exception as e:
             print("Exception:", e)
             import sys, traceback
-            traceback.print_exc()
+            # traceback.print_exc()
+            print(traceback.format_exc())
+            # or
+            # print(sys.exc_info()[2])
             time.sleep(60)
         time.sleep(args.loop)
    
