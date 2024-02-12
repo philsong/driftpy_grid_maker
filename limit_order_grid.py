@@ -37,11 +37,11 @@ def order_print(orders: list[OrderParams], market_str=None):
         if order.price == 0:
             pricestr = "$ORACLE"
             if order.oracle_price_offset > 0:
-                pricestr += " + " + str(order.oracle_price_offset / 1e6)
+                pricestr += " + " + str(order.oracle_price_offset / PRICE_PRECISION)
             else:
-                pricestr += " - " + str(abs(order.oracle_price_offset) / 1e6)
+                pricestr += " - " + str(abs(order.oracle_price_offset) / PRICE_PRECISION)
         else:
-            pricestr = "$" + str(order.price / 1e6)
+            pricestr = "$" + str(order.price / PRICE_PRECISION)
 
         if market_str == None:
             market_str = configs["mainnet"].markets[order.market_index].symbol
@@ -239,12 +239,12 @@ async def main(
     
     base_asset_amount = quote_asset_amount / current_price
 
-    print("quote_asset_amount: %.1f" % quote_asset_amount, "base_asset_amount:%.1f" % base_asset_amount)
+    print("quote_asset_amount: %.1f" % quote_asset_amount, "base_asset_amount:%.4f" % base_asset_amount)
     
     delta_pos = current_pos - target_pos
     
     offset = -1 * skew * delta_pos / base_asset_amount
-    print("target_pos:", target_pos, "current_pos: %.1f" % current_pos, "delta_pos: %.1f" % delta_pos, "offset:  %.6f" % offset)
+    print("target_pos:", target_pos, "current_pos: %.4f" % current_pos, "delta_pos: %.4f" % delta_pos, "offset:  %.6f" % offset)
     
     unrealized_pnl = drift_user.get_unrealized_pnl()/QUOTE_PRECISION
     print("unrealized_pnl: %.1f" % unrealized_pnl)
@@ -260,13 +260,13 @@ async def main(
         len(ask_prices) + len(bid_prices) + 1e-6
     )
     print("len(ask_prices):", len(ask_prices),"len(bid_prices):", len(bid_prices))
-    print("base_asset_amount_per_bid:%.1f" % base_asset_amount_per_bid)
-    print("base_asset_amount_per_ask:%.1f" % base_asset_amount_per_ask)
+    print("base_asset_amount_per_bid:%.4f" % base_asset_amount_per_bid)
+    print("base_asset_amount_per_ask:%.4f" % base_asset_amount_per_ask)
 
     print("min_position:", min_position, "max_position:", max_position)
     if min_position is not None and max_position is not None:
-        print("max_position_delta_for_bid: %.1f" % (max_position - current_pos))
-        print("min_position_delta_for_ask: %.1f" % (current_pos - min_position))
+        print("max_position_delta_for_bid: %.4f" % (max_position - current_pos))
+        print("min_position_delta_for_ask: %.4f" % (current_pos - min_position))
         available_base_asset_amount_for_bids = max(
             0, min(base_asset_amount, max_position - current_pos) / 2
         )
@@ -282,10 +282,10 @@ async def main(
             base_asset_amount_per_ask = available_base_asset_amount_for_asks / (
                 len(ask_prices)
             )
-        print("available_base_asset_amount_for_bids:%.1f" % available_base_asset_amount_for_bids)
-        print("available_base_asset_amount_for_asks:%.1f" % available_base_asset_amount_for_asks)
-        print("base_asset_amount_per_bid adjust:%.1f" % base_asset_amount_per_bid)
-        print("base_asset_amount_per_ask adjust:%.1f" % base_asset_amount_per_ask)
+        print("available_base_asset_amount_for_bids:%.4f" % available_base_asset_amount_for_bids)
+        print("available_base_asset_amount_for_asks:%.4f" % available_base_asset_amount_for_asks)
+        print("base_asset_amount_per_bid adjust:%.4f" % base_asset_amount_per_bid)
+        print("base_asset_amount_per_ask adjust:%.4f" % base_asset_amount_per_ask)
     
     order_params = []
     for x in bid_prices:
