@@ -163,10 +163,10 @@ async def main(
         connection,
         wallet, 
         config.env,             
-        perp_market_indexes = perp_markets,
-        spot_market_indexes = spot_market_indexes,
-        oracle_infos = oracle_infos,
-        account_subscription = AccountSubscriptionConfig("cached"),
+        # perp_market_indexes = perp_markets,
+        # spot_market_indexes = spot_market_indexes,
+        # oracle_infos = oracle_infos,
+        # account_subscription = AccountSubscriptionConfig("cached"),
         authority=Pubkey.from_string(authority) if authority else None,
         active_sub_account_id = subaccount_id
     )
