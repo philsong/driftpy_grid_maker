@@ -31,6 +31,7 @@ from driftpy.drift_user import DriftUser
 from driftpy.constants.numeric_constants import BASE_PRECISION, PRICE_PRECISION, QUOTE_PRECISION
 import time
 
+current_cancer_order_loop_count = 1
 
 def order_print(orders: list[OrderParams], market_str=None):
     for order in orders:
@@ -117,6 +118,7 @@ async def main(
     authority=None,
     maker=True,
     target_pos = 0,
+    cancer_order_loop_count = 60,
 ):
     if min_position is not None and max_position is not None:
         assert min_position < max_position
@@ -198,8 +200,8 @@ async def main(
         if current_pos_raw is not None:
             if current_pos_raw.open_orders >= 30:
                 print("open_orders full:", current_pos_raw.open_orders)
-                time.sleep(60)
-                return
+                # time.sleep(60)
+                # return
 
     else:
         market = await get_spot_market_account(drift_acct.program, market_index)
@@ -319,17 +321,35 @@ async def main(
     # order_print([bid_order_params, ask_order_params], market_name)
     order_print(order_params, market_name)
     
+    place_orders = True
     if current_pos_raw is not None:
         print("open_orders:%d len(order_params): %d" % (current_pos_raw.open_orders, len(order_params)))
         if current_pos_raw.open_orders + len(order_params) >= 30:
             print("open_orders near full:", current_pos_raw.open_orders)
-            time.sleep(60)
-            return
+            place_orders = False
+            # time.sleep(60)
+            # return
     
-    place_orders_ix = drift_acct.get_place_orders_ix(order_params)
-    # perp_orders_ix = [ await drift_acct.get_place_perp_order_ix(order_params[0], subaccount_id)]
-    signature = (await drift_acct.send_ixs([place_orders_ix])).tx_sig
-    print("tx Signature:", signature)
+    print("current_cancer_order_loop_count:", current_cancer_order_loop_count, "cancer_order_loop_count:", cancer_order_loop_count)
+    
+    cancel_ix = None
+    if current_cancer_order_loop_count % cancer_order_loop_count == 0:
+        cancel_ix = drift_acct.get_cancel_orders_ix(sub_account_id=subaccount_id)
+        print("cancel_ix:", cancel_ix)
+        
+    place_orders_ix = None
+    if place_orders:
+        place_orders_ix = drift_acct.get_place_orders_ix(order_params, subaccount_id)
+    
+    ixs = [cancel_ix] if cancel_ix else [] + [place_orders_ix] if place_orders_ix else []
+    
+    if ixs:
+        signature = (await drift_acct.send_ixs(ixs)).tx_sig
+        print("tx Signature:", signature)
+        return
+    else:
+        print("no action:", ixs)
+        time.sleep(60)
 
 
 if __name__ == "__main__":
@@ -355,7 +375,9 @@ if __name__ == "__main__":
     parser.add_argument("--maker", type=bool, required=False, default=True)
     parser.add_argument("--target-pos", type=float, required=False, default=0.)
 
-    parser.add_argument("--loop", type=int, required=False, default=0)
+    parser.add_argument("--loop", type=int, required=False, default=10)
+    parser.add_argument("--cancer_order_loop_count", type=int, required=False, default=60)
+    
     args = parser.parse_args()
     
     print(args)
@@ -397,7 +419,8 @@ if __name__ == "__main__":
                     args.max_position,
                     args.authority,
                     args.maker,
-                    args.target_pos
+                    args.target_pos,
+                    args.cancer_order_loop_count
                 )
             )
             if args.loop <= 0:
@@ -408,5 +431,6 @@ if __name__ == "__main__":
             traceback.print_exc()
             time.sleep(60)
             
+        current_cancer_order_loop_count+=1
         time.sleep(args.loop)
 
