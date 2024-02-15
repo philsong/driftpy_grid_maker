@@ -163,10 +163,10 @@ async def main(
         connection,
         wallet, 
         config.env,             
-        # perp_market_indexes = perp_markets,
-        # spot_market_indexes = spot_market_indexes,
-        # oracle_infos = oracle_infos,
-        # account_subscription = AccountSubscriptionConfig("cached"),
+        perp_market_indexes = perp_markets,
+        spot_market_indexes = spot_market_indexes,
+        oracle_infos = oracle_infos,
+        account_subscription = AccountSubscriptionConfig("cached"),
         authority=Pubkey.from_string(authority) if authority else None,
         active_sub_account_id = subaccount_id
     )
@@ -289,30 +289,32 @@ async def main(
     
     order_params = []
     for x in bid_prices:
-        bid_order_params = OrderParams(
-            order_type=OrderType.Limit(),
-            market_index=market_index,
-            market_type=market_type,
-            direction=PositionDirection.Long(),
-            base_asset_amount=int(base_asset_amount_per_bid * BASE_PRECISION),
-            price=int(x * PRICE_PRECISION),
-            post_only=PostOnlyParams.TryPostOnly() if maker else PostOnlyParams.NONE(),
-        )
-        if bid_order_params.base_asset_amount*bid_order_params.price > 11*BASE_PRECISION*PRICE_PRECISION:
-            order_params.append(bid_order_params)
+        if base_asset_amount_per_bid > 0.0005:
+            bid_order_params = OrderParams(
+                order_type=OrderType.Limit(),
+                market_index=market_index,
+                market_type=market_type,
+                direction=PositionDirection.Long(),
+                base_asset_amount=int(base_asset_amount_per_bid * BASE_PRECISION),
+                price=int(x * PRICE_PRECISION),
+                post_only=PostOnlyParams.TryPostOnly() if maker else PostOnlyParams.NONE(),
+            )
+            if bid_order_params.base_asset_amount*bid_order_params.price > 11*BASE_PRECISION*PRICE_PRECISION:
+                order_params.append(bid_order_params)
 
     for x in ask_prices:
-        ask_order_params = OrderParams(
-            order_type=OrderType.Limit(),
-            market_index=market_index,
-            market_type=market_type,
-            direction=PositionDirection.Short(),
-            base_asset_amount=int(base_asset_amount_per_ask * BASE_PRECISION),
-            price=int(x * PRICE_PRECISION),
-            post_only=PostOnlyParams.TryPostOnly() if maker else PostOnlyParams.NONE(),
-        )
-        if ask_order_params.base_asset_amount*ask_order_params.price > 11*BASE_PRECISION*PRICE_PRECISION:
-            order_params.append(ask_order_params)
+        if base_asset_amount_per_ask > 0.0005:
+            ask_order_params = OrderParams(
+                order_type=OrderType.Limit(),
+                market_index=market_index,
+                market_type=market_type,
+                direction=PositionDirection.Short(),
+                base_asset_amount=int(base_asset_amount_per_ask * BASE_PRECISION),
+                price=int(x * PRICE_PRECISION),
+                post_only=PostOnlyParams.TryPostOnly() if maker else PostOnlyParams.NONE(),
+            )
+            if ask_order_params.base_asset_amount*ask_order_params.price > 11*BASE_PRECISION*PRICE_PRECISION:
+                order_params.append(ask_order_params)
     # print(order_params)
     # order_print([bid_order_params, ask_order_params], market_name)
     order_print(order_params, market_name)
