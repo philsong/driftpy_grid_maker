@@ -80,6 +80,7 @@ async def main(
 
     market_index = -1
     for perp_market_config in config.perp_markets:
+        print(perp_market_config.symbol )
         if perp_market_config.symbol == market_name:
             market_index = perp_market_config.market_index
     for spot_market_config in config.spot_markets:
@@ -87,7 +88,7 @@ async def main(
             market_index = spot_market_config.bank_index
 
     if market_index == -1:
-        print("INVALID MARKET")
+        print("INVALID MARKET", market_name)
         return
 
     print("market_index:", market_index, market_name)
@@ -116,7 +117,7 @@ async def main(
         perp_market_indexes = perp_markets,
         spot_market_indexes = spot_market_indexes,
         oracle_infos = oracle_infos,
-        account_subscription = AccountSubscriptionConfig("cached"),
+        account_subscription = AccountSubscriptionConfig("demo"),
         authority=Pubkey.from_string(authority) if authority else None,
         active_sub_account_id = subaccount_id
     )
