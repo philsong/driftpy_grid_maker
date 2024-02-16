@@ -98,12 +98,12 @@ async def main(
     connection = AsyncClient(url)
     provider = Provider(connection, wallet)
     
-    perp_markets = [0, 1]
+    perp_markets = []
     if market_index not in perp_markets:
         perp_markets.append(market_index)
     spot_markets = [0, 1]
-    if market_index not in spot_markets:
-        spot_markets.append(market_index)
+    # if market_index not in spot_markets:
+    #     spot_markets.append(market_index)
         
     spot_market_oracle_infos, perp_market_oracle_infos, spot_market_indexes = get_markets_and_oracles(perp_markets = perp_markets, spot_markets=spot_markets)
 
@@ -115,7 +115,7 @@ async def main(
         wallet, 
         config.env,             
         perp_market_indexes = perp_markets,
-        spot_market_indexes = spot_market_indexes,
+        spot_market_indexes = spot_markets,
         oracle_infos = oracle_infos,
         account_subscription = AccountSubscriptionConfig("demo"),
         authority=Pubkey.from_string(authority) if authority else None,
