@@ -342,8 +342,13 @@ async def main(
     ixs = [cancel_ix] if cancel_ix else [] + [place_orders_ix] if place_orders_ix else []
     
     if ixs:
-        signature = (await drift_acct.send_ixs(ixs)).tx_sig
-        print("tx Signature:", signature)
+        sig = (await drift_acct.send_ixs(ixs)).tx_sig
+        print("tx sig:", sig)
+        if sig:
+            print("confirming tx...")
+            resp = await connection.confirm_transaction(sig)
+            print("confirming tx...resp:", resp)
+        
         return
     else:
         print("no action:", ixs)

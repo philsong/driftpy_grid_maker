@@ -200,7 +200,7 @@ async def main(
     cancel_ix = drift_acct.get_cancel_orders_ix(sub_account_id=subaccount_id)
     # print("cancel_ix:", cancel_ix)
     # print("perp_orders_ix:", perp_orders_ix)
-    signature = (await drift_acct.send_ixs(
+    sig = (await drift_acct.send_ixs(
         [
             cancel_ix,
         ]
@@ -208,7 +208,12 @@ async def main(
         + spot_orders_ix
     )).tx_sig
     
-    print("tx Signature:", signature)
+    print("tx sig:", sig)
+    
+    if sig:
+        print("confirming tx...")
+        resp = await connection.confirm_transaction(sig)
+        print("confirming tx...resp:", resp)
 
 
 if __name__ == "__main__":
