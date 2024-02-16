@@ -22,6 +22,7 @@ from driftpy.constants.numeric_constants import *
 
 from driftpy.drift_user import DriftUser
 import time
+from driftpy.math.conversion import convert_to_number
 
 
 async def main(
@@ -34,6 +35,7 @@ async def main(
     config = configs[env]
     wallet = Wallet(Keypair())  # throwaway
     print(url)
+    print("config.default_http:", config.default_http)
     connection = AsyncClient(url)
     provider = Provider(connection, wallet)
     subaccount_id = 0
@@ -45,8 +47,7 @@ async def main(
         config.env,
         authority=Pubkey.from_string(authority) if authority else None,
         active_sub_account_id = subaccount_id)
-    # drift_user = DriftUser(dc, authority=authority, subaccount_id=subaccount, use_cache=True)
-    # await drift_user.set_cache()
+
     await drift_acct.subscribe()
         
     drift_user = drift_acct.get_user()
@@ -70,11 +71,12 @@ async def main(
     print("perp_liability", perp_liability/QUOTE_PRECISION, "spot_liability", spot_liability/QUOTE_PRECISION)
 
     perp_market = drift_user.drift_client.get_perp_market_account(0)
-    oracle = (
-        drift_user.drift_client.get_oracle_price_data(perp_market.amm.oracle)
-    ).price / PRICE_PRECISION
+    oracle = drift_acct.get_oracle_price_data_for_perp_market(0)
+    print("oracle", oracle)
+    
+    oracle = convert_to_number(oracle.price)
     print("oracle price", oracle)
-
+    
     print(
         "init leverage, main leverage:",
         MARGIN_PRECISION / perp_market.margin_ratio_initial,
@@ -88,10 +90,6 @@ async def main(
     total_asset_value = drift_user.get_total_collateral()
     print("total_liab", total_liability/QUOTE_PRECISION, "total_asset", total_asset_value/QUOTE_PRECISION)
     print("leverage:", (drift_user.get_leverage()) / 10_000)
-    # Putting liq_price in if to skip if there is no position
-    # if liq_price:
-    #     drift_user.CACHE["perp_market_oracles"][0].price = liq_price * PRICE_PRECISION
-    #     print("leverage (at liq price):", (await drift_user.get_leverage()) / 10_000)
 
     perp_positions = drift_user.get_active_perp_positions()
     print("perp positions:")

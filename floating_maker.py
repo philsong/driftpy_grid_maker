@@ -251,6 +251,7 @@ if __name__ == "__main__":
     elif args.env == "mainnet":
         # url = "https://api.mainnet-beta.solana.com"
         url = "https://node.onekey.so/sol"
+        # url = "https://mainnet.helius-rpc.com/?api-key=3a1ca16d-e181-4755-9fe7-eac27579b48c"
     else:
         raise NotImplementedError("only devnet/mainnet env supported")
 
