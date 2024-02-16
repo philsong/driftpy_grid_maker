@@ -138,7 +138,7 @@ async def main(
             market_index = perp_market_config.market_index
     for spot_market_config in config.spot_markets:
         if spot_market_config.symbol == market_name:
-            market_index = spot_market_config.bank_index
+            market_index = spot_market_config.market_index
 
     if market_index == -1:
         print("INVALID MARKET")
@@ -154,7 +154,7 @@ async def main(
     perp_markets = []
     if market_index not in perp_markets:
         perp_markets.append(market_index)
-    spot_markets = [0, 1]
+    spot_markets = [0, 1, 5] #0 usdc, 1 sol, 5 usdt
 
     spot_market_oracle_infos, perp_market_oracle_infos, spot_market_indexes = get_markets_and_oracles(perp_markets = perp_markets, spot_markets=spot_markets)
 
