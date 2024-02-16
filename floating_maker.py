@@ -103,7 +103,7 @@ async def main(
     perp_markets = []
     if market_index not in perp_markets:
         perp_markets.append(market_index)
-    spot_markets = [0, 1, 5] #0 usdc, 1 sol, 5 usdt
+    spot_markets = [0, 1] #0 usdc, 1 sol, 5 usdt
         
     spot_market_oracle_infos, perp_market_oracle_infos, spot_market_indexes = get_markets_and_oracles(perp_markets = perp_markets, spot_markets=spot_markets)
 

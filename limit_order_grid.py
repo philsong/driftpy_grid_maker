@@ -154,7 +154,7 @@ async def main(
     perp_markets = []
     if market_index not in perp_markets:
         perp_markets.append(market_index)
-    spot_markets = [0, 1, 5] #0 usdc, 1 sol, 5 usdt
+    spot_markets = [0, 1] #0 usdc, 1 sol, 5 usdt
 
     spot_market_oracle_infos, perp_market_oracle_infos, spot_market_indexes = get_markets_and_oracles(perp_markets = perp_markets, spot_markets=spot_markets)
 
@@ -196,7 +196,7 @@ async def main(
             current_pos = 0
         
         if current_pos_raw is not None:
-            if current_pos_raw.open_orders >= 30:
+            if current_pos_raw.open_orders >= 32:
                 print("open_orders full:", current_pos_raw.open_orders)
                 # time.sleep(60)
                 # return
@@ -322,7 +322,7 @@ async def main(
     place_orders = True
     if current_pos_raw is not None:
         print("open_orders:%d len(order_params): %d" % (current_pos_raw.open_orders, len(order_params)))
-        if current_pos_raw.open_orders + len(order_params) >= 30:
+        if current_pos_raw.open_orders + len(order_params) >= 32:
             print("open_orders near full:", current_pos_raw.open_orders)
             place_orders = False
             # time.sleep(60)
