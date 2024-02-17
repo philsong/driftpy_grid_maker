@@ -328,6 +328,7 @@ async def main(
             # time.sleep(60)
             # return
     
+    global current_cancer_order_loop_count
     print("current_cancer_order_loop_count:", current_cancer_order_loop_count, "cancer_order_loop_count:", cancer_order_loop_count)
     
     cancel_ix = None
