@@ -376,7 +376,7 @@ if __name__ == "__main__":
     parser.add_argument("--authority", type=str, required=False, default=None)
     
     parser.add_argument("--spread", type=float, required=False, default=0.005)  # $0.01
-    parser.add_argument("--skew", type=float, required=False, default=0.1)  # $0.00
+    parser.add_argument("--skew", type=float, required=False, default=0.01)  # $0.00
     parser.add_argument("--min-position", type=float, required=False, default=None)
     parser.add_argument("--max-position", type=float, required=False, default=None)
     parser.add_argument("--lower-price", type=float, required=False, default=None)
@@ -437,10 +437,10 @@ if __name__ == "__main__":
                 exit(0)
         except Exception as e:
             print("Exception:", e)
-            import sys, traceback
-            traceback.print_exc()
-            current_cancer_order_loop_count+=5
-            time.sleep(60)
+            # import sys, traceback
+            # traceback.print_exc()
+            # current_cancer_order_loop_count+=5
+            # time.sleep(60)
             
         current_cancer_order_loop_count+=1
         time.sleep(args.loop)
