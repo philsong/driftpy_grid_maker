@@ -56,10 +56,10 @@ def order_print(orders: list[OrderParams], market_str=None):
 
 
 def calculate_grid_prices(
-    num_of_grids, upper_price, lower_price, current_price, chunk_increment=0.0, spread=0.005, offset=0.0
+    num_of_grids, upper_price, lower_price, current_price, spread=0.005, offset=0.0
 ):
     if upper_price is None and lower_price is None:
-        print("calculate_grid_prices spread:", spread, "offset:%.4f" % offset, "chunk_increment:%.4f" % chunk_increment, "num_of_grids:", num_of_grids)
+        print("calculate_grid_prices spread:", spread, "offset:%.4f" % offset, "num_of_grids:", num_of_grids)
         # default to .5% grid around oracle
         upper_price = current_price * (1. + spread)
         lower_price = current_price * (1. - spread)
@@ -85,11 +85,15 @@ def calculate_grid_prices(
         if price < current_price and price > lower_price:
             if price_with_offset > current_price: #avoid maker reject
                 price_with_offset = current_price
-            bid_prices.append(price_with_offset - chunk_increment)
+            if price_with_offset < lower_price: #avoid too far away
+                price_with_offset = lower_price
+            bid_prices.append(price_with_offset)
         elif price > current_price and price < upper_price:
             if price_with_offset < current_price: #avoid maker reject
                 price_with_offset = current_price
-            ask_prices.append(price_with_offset + chunk_increment)
+            if price_with_offset > upper_price: #avoid too far away
+                price_with_offset = upper_price
+            ask_prices.append(price_with_offset)
 
     print(bid_prices)
     print(ask_prices)
