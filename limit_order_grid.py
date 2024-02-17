@@ -80,7 +80,7 @@ def calculate_grid_prices(
     for i in range(num_of_grids):
         price = lower_price + (grid_size * i)
         # print("calculate_grid_prices without offset: %d %.4f" % (i, price))
-        price_with_offset = price + offset
+        price_with_offset = price*(1 + offset)
         # print("calculate_grid_prices with    offset: %d %.4f" % (i, price_with_offset))
         if price < current_price and price > lower_price:
             if price_with_offset > current_price: #avoid maker reject
@@ -243,7 +243,7 @@ async def main(
     
     delta_pos = current_pos - target_pos
     
-    offset = -1 * skew * delta_pos / base_asset_amount
+    offset = -1 * skew * spread * delta_pos / base_asset_amount
     print("target_pos:", target_pos, "current_pos: %.4f" % current_pos, "delta_pos: %.4f" % delta_pos, "offset:  %.6f" % offset)
     
     unrealized_pnl = drift_user.get_unrealized_pnl()/QUOTE_PRECISION
@@ -372,7 +372,7 @@ if __name__ == "__main__":
     parser.add_argument("--authority", type=str, required=False, default=None)
     
     parser.add_argument("--spread", type=float, required=False, default=0.005)  # $0.01
-    parser.add_argument("--skew", type=float, required=False, default=0.01)  # $0.00
+    parser.add_argument("--skew", type=float, required=False, default=0.1)  # $0.00
     parser.add_argument("--min-position", type=float, required=False, default=None)
     parser.add_argument("--max-position", type=float, required=False, default=None)
     parser.add_argument("--lower-price", type=float, required=False, default=None)
