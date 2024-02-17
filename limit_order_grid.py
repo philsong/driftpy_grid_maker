@@ -31,7 +31,7 @@ from driftpy.drift_user import DriftUser
 from driftpy.constants.numeric_constants import BASE_PRECISION, PRICE_PRECISION, QUOTE_PRECISION
 import time
 
-current_cancer_order_loop_count = 1
+current_cancer_order_loop_count = 0
 
 def order_print(orders: list[OrderParams], market_str=None):
     for order in orders:
@@ -331,8 +331,9 @@ async def main(
     print("current_cancer_order_loop_count:", current_cancer_order_loop_count, "cancer_order_loop_count:", cancer_order_loop_count)
     
     cancel_ix = None
-    if current_cancer_order_loop_count % cancer_order_loop_count == 0:
+    if current_cancer_order_loop_count > cancer_order_loop_count:
         cancel_ix = drift_acct.get_cancel_orders_ix(sub_account_id=subaccount_id)
+        cancer_order_loop_count = 0
         print("cancel_ix:", cancel_ix)
         
     place_orders_ix = None
@@ -352,6 +353,7 @@ async def main(
         return
     else:
         print("no action:", ixs)
+        current_cancer_order_loop_count+=5
         time.sleep(60)
 
 
@@ -432,6 +434,7 @@ if __name__ == "__main__":
             print("Exception:", e)
             import sys, traceback
             traceback.print_exc()
+            current_cancer_order_loop_count+=5
             time.sleep(60)
             
         current_cancer_order_loop_count+=1
