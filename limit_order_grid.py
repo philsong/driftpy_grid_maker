@@ -381,7 +381,7 @@ if __name__ == "__main__":
     parser.add_argument("--maker", type=bool, required=False, default=True)
     parser.add_argument("--target-pos", type=float, required=False, default=0.)
 
-    parser.add_argument("--loop", type=int, required=False, default=10)
+    parser.add_argument("--loop", type=int, required=False, default=5)
     parser.add_argument("--cancer_order_loop_count", type=int, required=False, default=60)
     
     args = parser.parse_args()
