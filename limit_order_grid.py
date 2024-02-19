@@ -272,10 +272,10 @@ async def main(
         print("max_position_delta_for_bid: %.4f" % (max_position - current_pos))
         print("min_position_delta_for_ask: %.4f" % (current_pos - min_position))
         available_base_asset_amount_for_bids = max(
-            0, min(base_asset_amount, max_position - current_pos) / 2
+            0, min(base_asset_amount-0.005*delta_pos, max_position - current_pos) / 2
         )
         available_base_asset_amount_for_asks = max(
-            0, min(base_asset_amount, current_pos - min_position) / 2
+            0, min(base_asset_amount+0.005*delta_pos, current_pos - min_position) / 2
         )
 
         if len(bid_prices):
