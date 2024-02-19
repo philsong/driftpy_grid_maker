@@ -13,7 +13,7 @@ import asyncio
 async def get_all_market_names():
     env = 'mainnet-beta' # 'devnet'
     rpc = 'https://node.onekey.so/sol' # todo replace
-    rpc = "https://mainnet.helius-rpc.com/?api-key=3a1ca16d-e181-4755-9fe7-eac27579b48c"
+    # rpc = "https://mainnet.helius-rpc.com/?api-key=3a1ca16d-e181-4755-9fe7-eac27579b48c"
     kp = Keypair() # random wallet
     wallet = Wallet(kp)
     connection = AsyncClient(rpc)

@@ -158,7 +158,7 @@ async def main(
     perp_markets = []
     if market_index not in perp_markets:
         perp_markets.append(market_index)
-    spot_markets = [0, 1] #0 usdc, 1 sol, 5 usdt
+    spot_markets = [0, 1, 3, 4] #0 usdc, 1 sol, 3 wBTC, 4 wETH, 5 usdt
 
     spot_market_oracle_infos, perp_market_oracle_infos, spot_market_indexes = get_markets_and_oracles(perp_markets = perp_markets, spot_markets=spot_markets)
 
@@ -437,8 +437,8 @@ if __name__ == "__main__":
                 exit(0)
         except Exception as e:
             print("Exception:", e)
-            # import sys, traceback
-            # traceback.print_exc()
+            import sys, traceback
+            traceback.print_exc()
             # current_cancer_order_loop_count+=5
             # time.sleep(60)
             
