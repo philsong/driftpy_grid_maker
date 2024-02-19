@@ -85,14 +85,14 @@ def calculate_grid_prices(
         if price < current_price and price > lower_price:
             if price_with_offset > current_price: #avoid maker reject
                 price_with_offset = current_price
-            if price_with_offset < lower_price: #avoid too far away
-                price_with_offset = lower_price
+            if price_with_offset < 0.9*lower_price: #avoid too far away
+                price_with_offset = 0.9*lower_price
             bid_prices.append(price_with_offset)
         elif price > current_price and price < upper_price:
             if price_with_offset < current_price: #avoid maker reject
                 price_with_offset = current_price
-            if price_with_offset > upper_price: #avoid too far away
-                price_with_offset = upper_price
+            if price_with_offset > 1.1*upper_price: #avoid too far away
+                price_with_offset = 1.1*upper_price
             ask_prices.append(price_with_offset)
 
     print(bid_prices)
