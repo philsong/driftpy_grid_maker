@@ -200,7 +200,7 @@ async def main(
             current_pos = 0
         
         if current_pos_raw is not None:
-            if current_pos_raw.open_orders >= 32:
+            if current_pos_raw.open_orders >= 30:
                 print("open_orders full:", current_pos_raw.open_orders)
                 # time.sleep(60)
                 # return
@@ -326,7 +326,7 @@ async def main(
     place_orders = True
     if current_pos_raw is not None:
         print("open_orders:%d len(order_params): %d" % (current_pos_raw.open_orders, len(order_params)))
-        if current_pos_raw.open_orders + len(order_params) > 32:
+        if current_pos_raw.open_orders + len(order_params) > 30:
             print("open_orders near full:", current_pos_raw.open_orders)
             place_orders = False
             # time.sleep(60)

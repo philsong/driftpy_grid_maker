@@ -24,6 +24,11 @@ async def get_all_market_names():
     sorted_all_perps_markets = sorted(all_perps_markets, key=lambda x: x.account.market_index)
     result_perp = [bytes(x.account.name).decode('utf-8').strip() for x in sorted_all_perps_markets]
 
+    index =0 
+    for x in result_perp:
+        print(index, x)
+        index+=1
+        
     all_spot_markets = await drift_client.program.account['SpotMarket'].all()
     sorted_all_spot_markets = sorted(all_spot_markets, key=lambda x: x.account.market_index)
     result_spot = [bytes(x.account.name).decode('utf-8').strip() for x in sorted_all_spot_markets]
