@@ -179,6 +179,7 @@ async def main(
     
     drift_user = drift_acct.get_user()        
 
+    min_size = 0
     if is_perp:
         market = await get_perp_market_account(drift_acct.program, market_index)
         try:
@@ -191,6 +192,8 @@ async def main(
                 market.amm.historical_oracle_data.last_oracle_price / PRICE_PRECISION
             )
         
+        min_size = market.amm.order_step_size/BASE_PRECISION
+        print("min_size:", min_size)
         current_pos_raw = drift_user.get_perp_position(market_index)
         print("current_pos_raw:", current_pos_raw)
 
@@ -216,7 +219,10 @@ async def main(
             current_price = (
                 market.historical_oracle_data.last_oracle_price / PRICE_PRECISION
             )
-
+            
+        min_size = market.order_step_size/BASE_PRECISION
+        print("min_size:", min_size)
+        
         spot_pos = await drift_user.get_spot_position(market_index)
         tokens = get_token_amount(
             spot_pos.scaled_balance, market, spot_pos.balance_type
@@ -238,17 +244,32 @@ async def main(
     )
     
     # inspect user's leverage
-    leverage = drift_user.get_leverage()
-    print('current leverage:', leverage / 10_000)
+    actual_leverage = drift_user.get_leverage() / 10_000
+    print('actual_leverage:', actual_leverage)
     
     base_asset_amount = quote_asset_amount / current_price
 
     print("quote_asset_amount: %.1f" % quote_asset_amount, "base_asset_amount:%.4f" % base_asset_amount)
     
-    delta_pos = current_pos - target_pos
+    # bp_10 = 0.001
+    bp_10 = skew
+    sign_target_leverage = -1 #
+    sign_actual_leverage = actual_leverage
+    if current_pos < 0:
+        sign_actual_leverage = -1 * actual_leverage
     
-    offset = -1 * skew * spread * delta_pos / base_asset_amount
-    print("target_pos:", target_pos, "current_pos: %.4f" % current_pos, "delta_pos: %.4f" % delta_pos, "offset:  %.6f" % offset)
+    leverage_offset = sign_actual_leverage - sign_target_leverage
+        
+    # inventory_offset = bp_10*leverage_offset
+    
+    print(f"leverage_offset: {leverage_offset} sign_actual_leverage: {sign_actual_leverage} sign_target_leverage: {sign_target_leverage}")
+    
+    delta_pos = current_pos - target_pos
+    delta_pos_base = leverage_offset * base_asset_amount
+    delta_pos_base  =0 
+
+    offset = -1 * skew * spread * leverage_offset
+    print("target_pos:", target_pos, "current_pos: %.4f" % current_pos, "delta_pos: %.4f" % delta_pos, "delta_pos_base: %.4f"%delta_pos_base, "offset:  %.6f" % offset)
     
     unrealized_pnl = drift_user.get_unrealized_pnl()/QUOTE_PRECISION
     print("unrealized_pnl: %.1f" % unrealized_pnl)
@@ -272,10 +293,10 @@ async def main(
         print("max_position_delta_for_bid: %.4f" % (max_position - current_pos))
         print("min_position_delta_for_ask: %.4f" % (current_pos - min_position))
         available_base_asset_amount_for_bids = max(
-            0, min(base_asset_amount-0.005*delta_pos, max_position - current_pos) / 2
+            0, min(base_asset_amount-delta_pos_base, max_position - current_pos) / 2
         )
         available_base_asset_amount_for_asks = max(
-            0, min(base_asset_amount+0.005*delta_pos, current_pos - min_position) / 2
+            0, min(base_asset_amount+delta_pos_base, current_pos - min_position) / 2
         )
 
         if len(bid_prices):
@@ -293,7 +314,7 @@ async def main(
     
     order_params = []
     for x in bid_prices:
-        if base_asset_amount_per_bid > 0.0005:
+        if base_asset_amount_per_bid >= min_size:
             bid_order_params = OrderParams(
                 order_type=OrderType.Limit(),
                 market_index=market_index,
@@ -307,7 +328,7 @@ async def main(
                 order_params.append(bid_order_params)
 
     for x in ask_prices:
-        if base_asset_amount_per_ask > 0.0005:
+        if base_asset_amount_per_ask >= min_size:
             ask_order_params = OrderParams(
                 order_type=OrderType.Limit(),
                 market_index=market_index,
@@ -437,8 +458,8 @@ if __name__ == "__main__":
                 exit(0)
         except Exception as e:
             print("Exception:", e)
-            import sys, traceback
-            traceback.print_exc()
+            # import sys, traceback
+            # traceback.print_exc()
             # current_cancer_order_loop_count+=5
             # time.sleep(60)
             
