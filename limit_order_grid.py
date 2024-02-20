@@ -366,7 +366,7 @@ async def main(
     if place_orders:
         place_orders_ix = drift_acct.get_place_orders_ix(order_params, subaccount_id)
     
-    ixs = [cancel_ix] if cancel_ix else [] + [place_orders_ix] if place_orders_ix else []
+    ixs = ([cancel_ix] if cancel_ix else []) + ([place_orders_ix] if place_orders_ix else [])
     
     if ixs:
         sig = (await drift_acct.send_ixs(ixs)).tx_sig
