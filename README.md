@@ -1,11 +1,3 @@
-## Staking in the Insurance Fund 
+USE MY LINK: https://app.drift.trade/ref/xdrift
 
-How to run 
-```bash 
-python if_stake.py 
---keypath ../keypairs/x19.json # this should be the keypair path
---amount 100 # USD amount
---market 0 # USD spot market
---operation add 
---env mainnet
-```
+I WILL TELL YOUR THE STEPS OF INSTALL AND SUPPLY THE SUPPORT.
